@@ -24,17 +24,14 @@
 #define DIGIPASSIKUVA_KORKEUS 653
 
 static void
-query (void)
-{
-  static const GimpParamDef args[] =
-  {
+query (void) {
+  static const GimpParamDef args[] = {
     { GIMP_PDB_INT32,    "run-mode",  "The run mode { RUN-INTERACTIVE (0), RUN-NONINTERACTIVE (1) }" },
-    { GIMP_PDB_IMAGE,    "image",      "Input image (unused)"        },
-    { GIMP_PDB_DRAWABLE, "org-drawable",   "Input drawable"              },
+    { GIMP_PDB_IMAGE,    "image",        "Input image (unused)"        },
+    { GIMP_PDB_DRAWABLE, "org-drawable", "Input drawable"              }
   };
 
-  static const GimpParamDef return_vals[] =
-  {
+  static const GimpParamDef return_vals[] = {
     { GIMP_PDB_IMAGE, "new-image", "Output image (-1 if new-image == FALSE)" },
     { GIMP_PDB_LAYER, "new-layer", "Output layer (-1 if new-image == FALSE)" }
   };

@@ -28,19 +28,14 @@ static PassikuvaVals tvals =
 
 
 static void
-query (void)
-{
-  static const GimpParamDef args[] =
-  {
+query (void) {
+  static const GimpParamDef args[] = {
     { GIMP_PDB_INT32,    "run-mode",  "The run mode { RUN-INTERACTIVE (0), RUN-NONINTERACTIVE (1) }" },
-    { GIMP_PDB_IMAGE,    "image",      "Input image (unused)"        },
-    { GIMP_PDB_DRAWABLE, "org-drawable",   "Input drawable"              },
-//    { GIMP_PDB_INT32,    "image-x", "New images x"     },
-//    { GIMP_PDB_INT32,    "image-y", "New images y"    }
+    { GIMP_PDB_IMAGE,    "image",        "Input image (unused)"        },
+    { GIMP_PDB_DRAWABLE, "org-drawable", "Input drawable"              }
   };
 
-  static const GimpParamDef return_vals[] =
-  {
+  static const GimpParamDef return_vals[] = {
     { GIMP_PDB_IMAGE, "new-image", "Output image (-1 if new-image == FALSE)" },
     { GIMP_PDB_LAYER, "new-layer", "Output layer (-1 if new-image == FALSE)" }
   };
@@ -51,7 +46,7 @@ query (void)
                           "Pispalan Insinööritoimisto Oy - Harry Karvonen",
                           "Pispalan Insinööritoimisto Oy - Harry Karvonen",
                           "2013",
-                          "4 kuvaa",
+                          "4 Kuvaa",
                           "RGB*, GRAY*, INDEXED*",
                           GIMP_PLUGIN,
                           G_N_ELEMENTS (args),
