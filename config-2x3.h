@@ -16,9 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libgimp/gimpui.h>
+
 #define PLUG_IN_PROC   "plug-in-passikuva-2x3"
 #define PLUG_IN_BINARY "passport-2x3"
 #define PLUG_IN_ROLE   "gimp-passport-2x3"
+
+static gboolean passikuva_dialog(void);
 
 static PassikuvaVals tvals =
 {
