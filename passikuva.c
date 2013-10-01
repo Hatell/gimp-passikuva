@@ -17,7 +17,7 @@
  */
 
 GimpRunMode run_mode;
-gdouble       kuvan_korkeus = 47.0;
+gdouble kuvan_korkeus = 47.0;
 
 MAIN ()
 
@@ -29,56 +29,50 @@ static void run (
   GimpParam       **return_vals
 ) {
   static GimpParam  values[3];
-  GimpPDBStatusType status    = GIMP_PDB_SUCCESS;
   gint32            new_layer = -1;
+
+#if 0
+  g_print("passikuva.run(%s, %d, ...)\n", name, nparams);
+#endif
 
   run_mode = param[0].data.d_int32;
 
-  *nreturn_vals = 3;
-  *return_vals  = values;
-
-  values[0].type          = GIMP_PDB_STATUS;
-  values[0].data.d_status = status;
-  values[1].type          = GIMP_PDB_IMAGE;
-  values[2].type          = GIMP_PDB_LAYER;
-
-  switch (run_mode) {
+  switch(run_mode) {
     case GIMP_RUN_INTERACTIVE:
-      if (!passikuva_dialog()) {
+      if(!passikuva_dialog()) {
         return;
       }
       break;
 
     case GIMP_RUN_NONINTERACTIVE:
-      break;
-
     case GIMP_RUN_WITH_LAST_VALS:
-      /*  Possibly retrieve data  */
-      //gimp_get_data (PLUG_IN_PROC, &tvals);
       break;
 
     default:
       break;
   }
 
-  if (status == GIMP_PDB_SUCCESS) {
-    gimp_progress_init ("Passikuva");
+  gimp_progress_init("Passikuva");
 
-    values[1].data.d_image = passikuva (param[1].data.d_image,
-                                   param[2].data.d_drawable,
-                                   &new_layer);
-    values[2].data.d_layer = new_layer;
+  values[1].type = GIMP_PDB_IMAGE;
+  values[1].data.d_image = passikuva(
+    param[1].data.d_image,
+    param[2].data.d_drawable,
+    &new_layer
+  );
 
-    /*  Store data  */
-    //if (run_mode == GIMP_RUN_INTERACTIVE)
-    //  gimp_set_data (PLUG_IN_PROC, &tvals, sizeof (PassikuvaVals));
-
-    if (run_mode != GIMP_RUN_NONINTERACTIVE) {
-      gimp_display_new (values[1].data.d_image);
-    }
+  if (run_mode != GIMP_RUN_NONINTERACTIVE) {
+    gimp_display_new(values[1].data.d_image);
   }
 
-  values[0].data.d_status = status;
+  values[2].type = GIMP_PDB_LAYER;
+  values[2].data.d_layer = new_layer;
+
+  values[0].type = GIMP_PDB_STATUS;
+  values[0].data.d_status = GIMP_PDB_SUCCESS;
+
+  *nreturn_vals = 3;
+  *return_vals = values;
 }
 
 static gint32 passikuva (
@@ -86,55 +80,69 @@ static gint32 passikuva (
   gint32  drawable_id,
   gint32 *layer_id
 ) {
-  GimpPixelRgn       src_rgn;
-  GimpPixelRgn       dest_rgn;
   GimpDrawable      *org_drawable = 0;
   GimpDrawable      *new_layer = 0;
+  GimpDrawable      *tmp_layer = 0;
   GimpImageBaseType  image_type   = GIMP_RGB;
   gint32             new_image_id = 0;
+  gint32 tmp_layer_id = 0;
   gint               org_width = 0;
   gint               org_height = 0;
+  gint dst_height = 653;
+  gint dst_width = 0;
   gint               gap = 0;
   gint               new_width = 0;
   gint               new_height = 0;
   gint               i = 0, j = 0;
   gint               x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-  gint               progress = 0;
-  gint               max_progress = 0;
-  gpointer           pr = 0;
+  gint c = 0;
   gdouble            kerroin = 0;
 
+#if 0
+  g_print("passikuva.passikuva(%d, %d, %d)\n", image_id, drawable_id, *layer_id);
+
+  g_print(" - gimp_drawable_mask_bounds(%d, ->", drawable_id);
+#endif
   gimp_drawable_mask_bounds (
     drawable_id,
     &x1, &y1,
     &x2, &y2
   );
 
+#if 0
+  g_print("%d, ->%d, ->%d, ->%d)\n", x1, y1, x2, y2);
+#endif
+
   org_drawable = gimp_drawable_get(drawable_id);
 
   org_width = x2 - x1;
   org_height = y2 - y1;
 
+  dst_width = ((org_width * dst_height) / org_height) + 0.5;
+
   kerroin = ((50.5 - kuvan_korkeus) / 2.0) / kuvan_korkeus;
 
-  if (org_height >= org_width) {
-    gap = org_height * kerroin;
+  if (dst_height >= dst_width) {
+    gap = dst_height * kerroin;
   } else {
-    gap = org_width * kerroin;
+    gap = dst_width * kerroin;
   }
 
-  new_width = tvals.images_x * (org_width + gap * 2);
-  new_height = tvals.images_y * (org_height + gap * 2);
+  new_width = tvals.images_x * (dst_width + gap * 2);
+  new_height = tvals.images_y * (dst_height + gap * 2);
+
   if (new_width <= 1.5 * new_height) {
     new_width = 1.5 * new_height;
   } else {
     new_height = 1.5 * new_width;
   }
 
-  //g_print("new width = %d, heigth = %d\n", new_width, new_height);
+#if 0
+  g_print("new width = %d, heigth = %d\n", new_width, new_height);
+#endif
 
   /*  create  a new image  */
-  switch (gimp_drawable_type (drawable_id)) {
+  switch (gimp_drawable_type(drawable_id)) {
     case GIMP_RGB_IMAGE:
     case GIMP_RGBA_IMAGE:
       image_type = GIMP_RGB;
@@ -159,10 +167,41 @@ static gint32 passikuva (
   );
   gimp_image_undo_disable(new_image_id);
 
+  tmp_layer_id = gimp_layer_new(
+    new_image_id, "tmp",
+    org_width, org_height,
+    gimp_drawable_type(drawable_id),
+    100, GIMP_NORMAL_MODE
+  );
+
+  if (tmp_layer_id == -1) {
+    return -1;
+  }
+
+  gimp_image_add_layer(new_image_id, tmp_layer_id, -1);
+
+  tmp_layer = gimp_drawable_get(tmp_layer_id);
+
+  copy_area(
+    org_drawable,
+    tmp_layer,
+    x1,
+    y1,
+    0,
+    0,
+    org_width,
+    org_height
+  );
+
+  gimp_layer_scale(tmp_layer_id, dst_width, dst_height, FALSE);
+
+  gimp_drawable_detach(tmp_layer);
+  gimp_drawable_detach(org_drawable);
+
   *layer_id = gimp_layer_new(
-    new_image_id, "Background",
+    new_image_id, "Passikuva",
     new_width, new_height,
-    image_type,
+    gimp_drawable_type(drawable_id),
     100, GIMP_NORMAL_MODE
   );
 
@@ -170,78 +209,41 @@ static gint32 passikuva (
     return -1;
   }
 
-  gimp_image_insert_layer(new_image_id, *layer_id, -1, 0);
-  new_layer = gimp_drawable_get(*layer_id);
+  gimp_image_add_layer(new_image_id, *layer_id, -1);
 
-  /*  progress  */
-  progress = 0;
-  max_progress = new_width * new_height;
+  new_layer = gimp_drawable_get(*layer_id);
+  tmp_layer = gimp_drawable_get(tmp_layer_id);
 
   gimp_drawable_fill(new_layer->drawable_id, GIMP_BACKGROUND_FILL);
-/*
-  g_print("SRC x: %d, y: %d, w: %d, h: %d: %d\n",
-    x1,
-    y1,
-    org_width,
-    org_height
-  );
-*/
-
   /*  tile...  */
   for (i = 0; i < tvals.images_y; i ++) {
     for (j = 0; j < tvals.images_x; j++) {
-      gint c;
-
-      gimp_pixel_rgn_init (
-        &src_rgn, org_drawable,
-        x1, y1,
-        org_width, org_height,
-        FALSE, FALSE
+      copy_area(
+        tmp_layer,
+        new_layer,
+        0,
+        0,
+        gap + j * (dst_width + gap * 2), // x
+        gap + i * (dst_height + gap * 2), // y
+        dst_width,
+        dst_height
       );
 
-/*
-      g_print("DST x: %d, y: %d, w: %d, h: %d: %d\n",
-        tvals.gap + j * (org_width + tvals.gap * 2), // x
-        tvals.gap + i * (org_height + tvals.gap * 2), // y
-        org_width,
-        org_height
-      );
-*/
+      gimp_progress_update(c / (tvals.images_x * tvals.images_y));
 
-      gimp_pixel_rgn_init (
-        &dest_rgn, new_layer,
-        gap + j * (org_width + gap * 2), // x
-        gap + i * (org_height + gap * 2), // y
-        org_width, org_height,
-        TRUE, FALSE
-      );
-
-      for (pr = gimp_pixel_rgns_register (2, &src_rgn, &dest_rgn), c = 0;
-           pr != NULL;
-           pr = gimp_pixel_rgns_process (pr), c++) {
-        gint k;
-
-        for (k = 0; k < src_rgn.h; k++) {
-          memcpy (dest_rgn.data + k * dest_rgn.rowstride,
-              src_rgn.data + k * src_rgn.rowstride,
-              src_rgn.w * src_rgn.bpp);
-        }
-
-        progress += src_rgn.w * src_rgn.h;
-
-        if (c % 16 == 0) {
-          gimp_progress_update ((gdouble) progress /
-              (gdouble) max_progress);
-        }
-      }
+      c++;
     }
   }
 
+#if 0
+  g_print("passikuva.gimp_progress_update(1.0)");
+#endif
+
   gimp_progress_update (1.0);
-
-  gimp_drawable_detach(org_drawable);
   gimp_drawable_detach(new_layer);
+  gimp_drawable_detach(tmp_layer);
 
+  gimp_image_remove_layer(new_image_id, tmp_layer_id);
   gimp_image_set_resolution(new_image_id, 300, 300);
 
   /*  copy the colormap, if necessary  */
@@ -254,11 +256,69 @@ static gint32 passikuva (
     g_free (cmap);
   }
 
-  gimp_image_undo_enable (new_image_id);
+  gimp_image_undo_enable(new_image_id);
 
   return new_image_id;
 }
 
+static void copy_area(
+  GimpDrawable *src_layer,
+  GimpDrawable *dst_layer,
+  gint src_x,
+  gint src_y,
+  gint dst_x,
+  gint dst_y,
+  gint sd_width,
+  gint sd_height
+) {
+  GimpPixelRgn src_rgn;
+  GimpPixelRgn dest_rgn;
+  gpointer           pr = 0;
+
+#if 0
+  g_print("SRC x: %d, y: %d, w: %d, h: %d\n",
+    src_x,
+    src_y,
+    sd_width,
+    sd_height
+  );
+#endif
+
+  gimp_pixel_rgn_init(
+    &src_rgn, src_layer,
+    src_x, src_y,
+    sd_width, sd_height,
+    FALSE, FALSE
+  );
+
+#if 0
+  g_print("DST x: %d, y: %d, w: %d, h: %d\n",
+    dst_x,
+    dst_y,
+    sd_width,
+    sd_height
+  );
+#endif
+
+  gimp_pixel_rgn_init(
+    &dest_rgn, dst_layer,
+    dst_x,
+    dst_y,
+    sd_width, sd_height,
+    TRUE, FALSE
+  );
+
+  pr = gimp_pixel_rgns_register(2, &src_rgn, &dest_rgn);
+  do {
+    gint k;
+
+    for (k = 0; k < src_rgn.h; k++) {
+      memcpy (dest_rgn.data + k * dest_rgn.rowstride,
+          src_rgn.data + k * src_rgn.rowstride,
+          src_rgn.w * src_rgn.bpp);
+    }
+  } while ((pr = gimp_pixel_rgns_process(pr)));
+}
 
 static gboolean passikuva_dialog(void)
 {
@@ -273,9 +333,9 @@ static gboolean passikuva_dialog(void)
   GtkWidget *frame_label;
   gboolean   run;
 
-  gimp_ui_init ("passikuva", FALSE);
+  gimp_ui_init("passikuva", FALSE);
 
-  dialog = gimp_dialog_new (
+  dialog = gimp_dialog_new(
     "Passikuva",
     "passikuva",
     NULL, 0,
@@ -309,7 +369,7 @@ static gboolean passikuva_dialog(void)
   gtk_box_pack_start (GTK_BOX (main_hbox), radius_label, FALSE, FALSE, 6);
   gtk_label_set_justify (GTK_LABEL (radius_label), GTK_JUSTIFY_RIGHT);
 
-  spinbutton_adj = gtk_adjustment_new (47, 1, 51, 1, 5, 5);
+  spinbutton_adj = gtk_adjustment_new (kuvan_korkeus, 1, 51, 1, 5, 5);
   spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton_adj), 1, 2);
   gtk_widget_show (spinbutton);
   gtk_box_pack_start (GTK_BOX (main_hbox), spinbutton, FALSE, FALSE, 6);

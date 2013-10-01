@@ -43,6 +43,17 @@ static gint32    passikuva          (gint32     image_id,
                                 gint32     drawable_id,
                                 gint32    *layer_id);
 
+static void copy_area(
+  GimpDrawable *src_layer,
+  GimpDrawable *dst_layer,
+  gint src_x,
+  gint src_y,
+  gint dst_x,
+  gint dst_y,
+  gint sd_heigth,
+  gint sd_width
+);
+
 const GimpPlugInInfo PLUG_IN_INFO =
 {
   NULL,  /* init_proc  */
