@@ -178,24 +178,23 @@ static gint32 passikuva (
   max_progress = new_width * new_height;
 
   gimp_drawable_fill(new_layer->drawable_id, GIMP_BACKGROUND_FILL);
+/*
+  g_print("SRC x: %d, y: %d, w: %d, h: %d: %d\n",
+    x1,
+    y1,
+    org_width,
+    org_height
+  );
+*/
 
   /*  tile...  */
   for (i = 0; i < tvals.images_y; i ++) {
     for (j = 0; j < tvals.images_x; j++) {
       gint c;
 
-/*
-      g_print("SRC x: %d, y: %d, w: %d, h: %d: %d\n",
-        0,
-        0,
-        org_width,
-        org_height
-      );
-*/
-
       gimp_pixel_rgn_init (
         &src_rgn, org_drawable,
-        0, 0,
+        x1, y1,
         org_width, org_height,
         FALSE, FALSE
       );
