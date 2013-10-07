@@ -1,0 +1,84 @@
+From 836ee17136ab346b7673eb65ecf48a475bd357a3 Mon Sep 17 00:00:00 2001
+From: Harry Karvonen <harry.karvonen@gmail.com>
+Date: Fri, 30 Aug 2013 16:29:37 +0300
+Subject: [PATCH 1/2] =?UTF-8?q?Passikuvan=20rajaus:=20Lis=C3=A4tty=20Suome?=
+ =?UTF-8?q?n=20passikuvan=20rajaukset.?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ app/display/display-enums.c             |  2 ++
+ app/display/display-enums.h             |  1 +
+ app/display/gimpcanvasrectangleguides.c | 10 ++++++++++
+ app/display/gimpcanvastransformguides.c |  1 +
+ 4 files changed, 14 insertions(+)
+
+diff --git a/app/display/display-enums.c b/app/display/display-enums.c
+index 827d6da..37280fa 100644
+--- a/app/display/display-enums.c
++++ b/app/display/display-enums.c
+@@ -45,6 +45,7 @@ gimp_guides_type_get_type (void)
+   static const GEnumValue values[] =
+   {
+     { GIMP_GUIDES_NONE, "GIMP_GUIDES_NONE", "none" },
++    { GIMP_GUIDES_PASSPORT, "GIMP_GUIDES_PASSPORT", "passport" },
+     { GIMP_GUIDES_CENTER_LINES, "GIMP_GUIDES_CENTER_LINES", "center-lines" },
+     { GIMP_GUIDES_THIRDS, "GIMP_GUIDES_THIRDS", "thirds" },
+     { GIMP_GUIDES_FIFTHS, "GIMP_GUIDES_FIFTHS", "fifths" },
+@@ -58,6 +59,7 @@ gimp_guides_type_get_type (void)
+   static const GimpEnumDesc descs[] =
+   {
+     { GIMP_GUIDES_NONE, NC_("guides-type", "No guides"), NULL },
++    { GIMP_GUIDES_PASSPORT, NC_("guides-type", "Passport"), NULL },
+     { GIMP_GUIDES_CENTER_LINES, NC_("guides-type", "Center lines"), NULL },
+     { GIMP_GUIDES_THIRDS, NC_("guides-type", "Rule of thirds"), NULL },
+     { GIMP_GUIDES_FIFTHS, NC_("guides-type", "Rule of fifths"), NULL },
+diff --git a/app/display/display-enums.h b/app/display/display-enums.h
+index da76552..1709a01 100644
+--- a/app/display/display-enums.h
++++ b/app/display/display-enums.h
+@@ -38,6 +38,7 @@ GType gimp_guides_type_get_type (void) G_GNUC_CONST;
+ typedef enum
+ {
+   GIMP_GUIDES_NONE,          /*< desc="No guides"       >*/
++  GIMP_GUIDES_PASSPORT,      /*< desc="Passport"        >*/
+   GIMP_GUIDES_CENTER_LINES,  /*< desc="Center lines"    >*/
+   GIMP_GUIDES_THIRDS,        /*< desc="Rule of thirds"  >*/
+   GIMP_GUIDES_FIFTHS,        /*< desc="Rule of fifths"  >*/
+diff --git a/app/display/gimpcanvasrectangleguides.c b/app/display/gimpcanvasrectangleguides.c
+index 364e732..96b7ad8 100644
+--- a/app/display/gimpcanvasrectangleguides.c
++++ b/app/display/gimpcanvasrectangleguides.c
+@@ -287,6 +287,16 @@ gimp_canvas_rectangle_guides_draw (GimpCanvasItem   *item,
+     case GIMP_GUIDES_NONE:
+       break;
+ 
++    case GIMP_GUIDES_PASSPORT:
++      draw_hline (cr, x1, x2, y1 + 4 * (y2 - y1) / 47);
++      draw_hline (cr, x1, x2, y1 + 6 * (y2 - y1) / 47);
++      draw_hline (cr, x1, x2, y1 + 38 * (y2 - y1) / 47);
++      draw_hline (cr, x1, x2, y1 + 40 * (y2 - y1) / 47);
++
++      draw_vline (cr, y1, y2, x1 + 16.5 * (x2 - x1) / 36);
++      draw_vline (cr, y1, y2, x1 + 19.5 * (x2 - x1) / 36);
++      break;
++
+     case GIMP_GUIDES_CENTER_LINES:
+       draw_hline (cr, x1, x2, (y1 + y2) / 2);
+       draw_vline (cr, y1, y2, (x1 + x2) / 2);
+diff --git a/app/display/gimpcanvastransformguides.c b/app/display/gimpcanvastransformguides.c
+index 60b4862..8518cf3 100644
+--- a/app/display/gimpcanvastransformguides.c
++++ b/app/display/gimpcanvastransformguides.c
+@@ -383,6 +383,7 @@ gimp_canvas_transform_guides_draw (GimpCanvasItem   *item,
+   switch (private->type)
+     {
+     case GIMP_GUIDES_NONE:
++    case GIMP_GUIDES_PASSPORT:
+       break;
+ 
+     case GIMP_GUIDES_CENTER_LINES:
+-- 
+1.8.3.1
+
