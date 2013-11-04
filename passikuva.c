@@ -40,6 +40,7 @@ static void run (
   switch(run_mode) {
     case GIMP_RUN_INTERACTIVE:
       if(!passikuva_dialog()) {
+        *nreturn_vals = 0;
         return;
       }
       break;
