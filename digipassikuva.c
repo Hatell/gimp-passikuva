@@ -140,7 +140,7 @@ static gint32 passikuva (
 
   gimp_progress_update(0.6);
 
-  gimp_image_set_resolution(new_image_id, 300, 300);
+  gimp_image_set_resolution(new_image_id, 352.898, 352.898);
 
   gimp_progress_update(0.8);
 

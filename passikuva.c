@@ -245,7 +245,7 @@ static gint32 passikuva (
   gimp_drawable_detach(tmp_layer);
 
   gimp_image_remove_layer(new_image_id, tmp_layer_id);
-  gimp_image_set_resolution(new_image_id, 300, 300);
+  gimp_image_set_resolution(new_image_id, 356.108, 356.108);
 
   /*  copy the colormap, if necessary  */
   if (image_type == GIMP_INDEXED) {
